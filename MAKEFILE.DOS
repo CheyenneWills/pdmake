@@ -1,0 +1,11 @@
+# Makefile for make!
+CFLAGS = -AS -c -Lr -DMSDOS
+CC = cl
+
+OBJS   =       check.obj input.obj macro.obj main.obj \
+	       make.obj reader.obj rules.obj mscsys.obj
+
+make.exe:      $(OBJS)
+       cl -F 8000 -Lr -Femake.exe $(OBJS)
+
+$(OBJS):       h.h

@@ -1,0 +1,13 @@
+# Makefile for make!
+CFLAGS = -DOS2	-DIBMCSET2 -O
+CC = icc
+
+OBJS   =       check.obj input.obj macro.obj main.obj \
+	       make.obj reader.obj rules.obj ibmsys.obj
+
+make.exe:      $(OBJS)
+       icc -Femake.exe $(OBJS) make.def
+
+$(OBJS):       h.h
+foo:
+	dir *.obj

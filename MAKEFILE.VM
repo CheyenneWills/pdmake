@@ -1,0 +1,11 @@
+# Makefile for make!
+CFLAGS = -AS -c -Lp -DOS2
+CC = cl
+
+OBJS   =       check.obj input.obj macro.obj main.obj \
+	       make.obj reader.obj rules.obj vmsys.obj
+
+make.exe:      $(OBJS)
+... whatever your linking procedure is ...
+
+$(OBJS):       h.h
