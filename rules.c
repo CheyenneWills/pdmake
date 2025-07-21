@@ -36,17 +36,19 @@ struct name *np;
     char *newsuff;
 
 
-    p = str1;
     q = np->n_name;
     if (!(suff = suffix(q)))
 	return FALSE;		/* No suffix */
+
+    p = str1;			/* Copy target upto the last "." */
     while (q < suff)
 	*p++ = *q++;
     *p = '\0';
-    basename = setmacro("*", str1)->m_val;
+
+    basename = setmacro("*", str1)->m_val;  /* Set basename of target */
 
 #if MSDOS || OS2
-    setname("*D", "*F", "*N", str1);
+    setname("*D", "*F", "*N", str1);        /* Set base Drive, etc */
 #endif
 
 #if VM
@@ -56,41 +58,44 @@ struct name *np;
     if (!((sp = newname(".SUFFIXES"))->n_flag & N_TARG))
 	return FALSE;
 
+
+/* Run through the .SUFFIXES dependancy list and build a target */
+
     for (lp = sp->n_line; lp; lp = lp->l_next)
 	for (dp = lp->l_dep; dp; dp = dp->d_next) {
 	    newsuff = dp->d_name->n_name;
 	    if (strlen(suff) + strlen(newsuff) + 1 >= LZ)
 		fatal("Suffix rule too long");
-	    p = str1;
-	    q = newsuff;
-	    while (*p++ = *q++);
-	    p--;
-	    q = suff;
-	    while (*p++ = *q++);
+
+	    strcpy(str1,newsuff);
+	    strcat(str1,suff);
+
 	    sp = newname(str1);
 	    if (sp->n_flag & N_TARG) {
-		p = str1;
-		q = basename;
+
 		if (strlen(basename) + strlen(newsuff) + 1 >= LZ)
 		    fatal("Implicit name too long");
-		while (*p++ = *q++);
-		p--;
-		q = newsuff;
-		while (*p++ = *q++);
+
+		strcpy(str1,basename);
+		strcat(str1,newsuff);
+
 		op = newname(str1);
-		if (!op->n_time)
-		    modtime(op);
+#if DEBUG
+		if (display)
+		    printf("... .SUFFIX rule found: %s%s for %s\n",
+			newsuff,suff,basename);
+#endif
+		if (!op->n_time) modtime(op);
 		if (op->n_time) {
+#if DEBUG
+		if (display)
+		    printf("... .File found for .SUFFIX rule %s\n",
+			op->n_name);
+#endif
 		    dp = newdep(op, 0);
 		    newline(np, dp, sp->n_line->l_cmd, 0);
-		    setmacro("<", op->n_name);
-#if MSDOS || OS2
-		    setname("<D", "<F", "<N", op->n_name);
-#endif
-
-#if VM
-		    setname("<F",op->n_name);
-#endif
+		    np->n_dyn = strdup(op->n_name);
+		    np->n_flag |= N_DYN;
 		    return TRUE;
 		}
 	    }

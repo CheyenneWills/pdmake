@@ -467,6 +467,15 @@ struct name *np;
 	    free(dp);
 	}
 	setmacro("?", str1);
+	if( np->n_flag & N_DYN) {
+	    setmacro("<",np->n_dyn);
+#if MSDOS || OS2
+	    setname("<D", "<F", "<N", np->n_dyn);
+#endif
+#if VM
+	    setname("<F",np->n_dyn);
+#endif
+	}
 	setmacro("@", np->n_name);
 #if MSDOS || OS2
 	setname("@D", "@F", "@N", np->n_name);  /* set $@D & $@F */
